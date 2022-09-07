@@ -21,7 +21,7 @@ exports.postAddProduct = (req, res, next) => {
       description: description
     })
     .then(result => {
-      // console.log(result);
+      // console.log(result);nicde
       console.log('Created Product');
       res.redirect('/admin/products');
     })
