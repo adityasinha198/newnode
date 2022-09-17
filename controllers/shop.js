@@ -125,7 +125,7 @@ exports.getCart = (req, res, next) => {
     const cartp=cart.getProducts()
     .then(prod=>{
       totalItems=(prod.length)})
-    
+    //
     // totalItems=cartp.length; 
     // console.log(totalItems) 
    return cart.getProducts({ 
