@@ -1,18 +1,41 @@
 const Product = require('../models/product');
 const Cart=require('../models/cart');
+const ITEMS_PER_PAGE = 2;
 
 
 exports.getProducts = (req, res, next) => {
-  Product.findAll().then(products=>{
-    res.json(products)
-    // res.render('shop/product-list', {
-    //   prods: products,
-    //   pageTitle: 'All Products',
-    //   path: '/products'
-    // });
-  }).catch(err=>{
+  const page = +req.query.page || 1
+  let totalItems;
+  
+  
+  Product.findAll()
+  .then(product =>{
+    return product.length
+  })
+  
+  .then(numProducts => {
+    totalItems = numProducts;
+    return  Product.findAll({
+      offset:(page-1)*ITEMS_PER_PAGE,
+      limit : ITEMS_PER_PAGE
+    
+      })
+      
+    .then(products=>{
+      res.json({
+      prods: products,
+      currentPage: page ,
+      hasNextPage : ITEMS_PER_PAGE * page < totalItems ,
+      hasPreviousPage : page > 1 ,
+      nextPage : page + 1 ,
+      previousPage : page - 1 ,
+      lastPage : Math.ceil(totalItems / ITEMS_PER_PAGE),
+    })
+  })
+  .catch(err=>{
     console.log(err)
   })
+})
   
   
 };
@@ -50,34 +73,80 @@ exports.getProduct = (req, res, next) => {
 
 
 exports.getIndex = (req, res, next) => {
-  Product.findAll().then(products=>{
+  const page = +req.query.page || 1
+  let totalItems;
+  
+  
+  Product.findAll()
+  .then(product =>{
+    return product.length
+  })
+  
+  .then(numProducts => {
+    totalItems = numProducts;
+    return  Product.findAll({
+      offset:(page-1)*ITEMS_PER_PAGE,
+      limit : ITEMS_PER_PAGE
+    
+      })
+
+
+
+    
+  .then(products=>{
     res.render('shop/index', {
       prods: products,
       pageTitle: 'Shop',
-      path: '/'
-    });
-  }).catch(err=>{
+      path: '/',
+      currentPage: page ,
+      hasNextPage : ITEMS_PER_PAGE * page < totalItems ,
+      hasPreviousPage : page > 1 ,
+      nextPage : page + 1 ,
+      previousPage : page - 1 ,
+      lastPage : Math.ceil(totalItems / ITEMS_PER_PAGE),
+    })
+  })
+  .catch(err=>{
     console.log(err)
   })
+})
+}
+
   
-};
+
 
 exports.getCart = (req, res, next) => {
-
+  const page=+req.query.page || 1;
+  console.log(page)
   req.user
   .getCart()
   .then(cart=>{
+    // console.log(cart)
     const cartp=cart.getProducts()
-    console.log(cartp)
-   return cart.getProducts().then(products=>{
-    console.log(products)
+    .then(prod=>{
+      totalItems=(prod.length)})
+    
+    // totalItems=cartp.length; 
+    // console.log(totalItems) 
+   return cart.getProducts({ 
+    offset:(page-1)*ITEMS_PER_PAGE,
+   limit:ITEMS_PER_PAGE}).then(products=>{
+    // console.log(products)
     // res.render('shop/cart', {
     //         path: '/cart',
     //         pageTitle: 'Your Cart',
     //         products: products
     //       });
-    console.log(products)
-    res.json(products)
+    // console.log(products)
+    res.json({
+      prods:products,
+      currentPage:page,
+      hasNextPage:ITEMS_PER_PAGE*page<totalItems,
+      nextPage:page+1,
+      hasPreviousPage:page>1,
+      previousPage:page-1,
+      lastPage:Math.ceil(totalItems/ITEMS_PER_PAGE),
+    })
    }).catch(err=>{
     console.log(err);
    })
@@ -87,23 +156,8 @@ exports.getCart = (req, res, next) => {
   })
   // Cart.getCart(cart=>{
   //   Product.fetchAll(products=>{
-  //     const cartProducts=[];
-  //     for(product of products){
-  //       const cartProductData=cart.products.find(prod=>prod.id===product.id);
-  //       if(cartProductData){
-  //         cartProducts.push({productData: product, qty:cartProductData.qty})
-  //       }
+}
 
-  //     }
-  //     res.render('shop/cart', {
-  //       path: '/cart',
-  //       pageTitle: 'Your Cart',
-  //       products: cartProducts
-  //     });
-  //   })
-  //   })
-  
-};
 
 exports.postCart=(req,res,next)=>{
  
@@ -173,7 +227,7 @@ exports.postCartDeleteProduct=(req,res,next)=>{
   .then(result=>{
     res.redirect('/cart')
   })
-  .catch(err=>{console.log(err)})
+  .catch(err => {console.log(err)})
  
  
 };
