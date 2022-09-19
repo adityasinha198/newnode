@@ -132,7 +132,8 @@ exports.getCart = (req, res, next) => {
     // console.log(totalItems) 
    return cart.getProducts({ 
     offset:(page-1)*ITEMS_PER_PAGE,
-   limit:ITEMS_PER_PAGE}).then(products=>{
+   limit:ITEMS_PER_PAGE})
+   .then(products=>{
     // console.log(products)
     // res.render('shop/cart', {
     //         path: '/cart',
@@ -235,11 +236,38 @@ exports.postCartDeleteProduct=(req,res,next)=>{
 };
 
 exports.getOrders = (req, res, next) => {
-  res.render('shop/orders', {
+ let ordersinfo = []
+  
+  req.user.
+  getOrders()
+  .then(async (orders) =>{
+
+    for(let i=0;i<orders.length;i++){
+      let products = await orders[i].getProducts()
+   
+    let ordersobj = {
+      order : orders[i],
+      products : products
+    }
+    ordersinfo.push(ordersobj)
+  }
+  res.json({ordersinfo:ordersinfo})
+    })
+    
+.catch(err => console.log(err))
+    
+  }
+
+  
+
+ 
+ 
+ 
+  /* res.render('shop/orders', {
     path: '/orders',
-    pageTitle: 'Your Orders'
-  });
-};
+    pageTitle: 'Your Orders' 
+  });*/
+
 
 
 exports.postOrders = (req,res,next) => {
